@@ -22,29 +22,34 @@ float kalman_update(Kalman_t *k, float measured_angle, float gyro_rate, float dt
     k->angle += dt * rate;
 
     // update covariance matrix
-    k->P[0][0] += dt * (dt * k->P[1][1] - k->P[0][1] - k->P[1][0] + k->Q_angle);
-    k->P[0][1] -= dt * k->P[1][1];
-    k->P[1][0] -= dt * k->P[1][1];
-    k->P[1][1] += dt * k->Q_bias;
+    float P00 = k->P[0][0] + dt * (-k->P[1][0] - k->P[0][1] + dt*k->P[1][1]) + k->Q_angle;
+    float P01 = k->P[0][1] - dt * k->P[1][1];
+    float P10 = k->P[1][0] - dt * k->P[1][1];
+    float P11 = k->P[1][1] + k->Q_bias;
 
+    k->P[0][0] = P00;
+    k->P[0][1] = P01;
+    k->P[1][0] = P10;
+    k->P[1][1] = P11;
+    
     // kalman gain
+    float y = measured_angle - k->angle;
     float S = k->P[0][0] + k->R_measure;
     float K0 = k->P[0][0] / S;
     float K1 = k->P[1][0] / S;
 
     // update estimate
-    float y = measured_angle - k->angle; // measurement residual
     k->angle += K0 * y;
     k->bias += K1 * y;
 
     // update covariance matrix
-    float P00_temp = k->P[0][0];
-    float P01_temp = k->P[0][1];
+    k->P[0][0] -= K0 * k->P[0][0];
+    k->P[0][1] -= K0 * k->P[0][1];
+    k->P[1][0] -= K1 * k->P[0][0];
+    k->P[1][1] -= K1 * k->P[0][1];
 
-    k->P[0][0] -= K0 * P00_temp;
-    k->P[0][1] -= K0 * P01_temp;
-    k->P[1][0] -= K1 * P00_temp;
-    k->P[1][1] -= K1 * P01_temp;
+    // enforce symmetry of covariance matrix
+    k->P[1][0] = k->P[0][1];
 
     return k->angle;
 }

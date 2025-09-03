@@ -51,11 +51,11 @@ int main() {
         float accel[3], gyro[3], temp;
         mpu6050_read(accel, gyro, &temp);
 
-        float roll_raw = atan2f(accel[1], accel[2]) * 180.0f / M_PI;
-        float pitch_raw = atan2f(-accel[0], sqrtf(accel[1]*accel[1] + accel[2]*accel[2])) * 180.0f / M_PI;
+        float roll_accel = atan2f(accel[1], accel[2]) * 180.0f / M_PI;
+        float pitch_accel = atan2f(-accel[0], sqrtf(accel[1]*accel[1] + accel[2]*accel[2])) * 180.0f / M_PI;
 
-        float roll = kalman_update(&kf_roll, roll_raw, gyro[0], dt);
-        float pitch = kalman_update(&kf_pitch, pitch_raw, gyro[1], dt);
+        float roll = kalman_update(&kf_roll, roll_accel, gyro[0], dt);
+        float pitch = kalman_update(&kf_pitch, pitch_accel, gyro[1], dt);
 
         yaw += gyro[2] * dt;
 
@@ -65,7 +65,7 @@ int main() {
         //         accel[0], accel[1], accel[2],
         //         gyro[0], gyro[1], gyro[2],
         //         temp);
-
+            
         sleep_ms(50);
     }
     return 0;

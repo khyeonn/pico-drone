@@ -77,7 +77,7 @@ void mpu6050_calibrate() {
 
     accel_offset[0] = accel_sum[0] / 2000.0f;
     accel_offset[1] = accel_sum[1] / 2000.0f;
-    accel_offset[2] = (accel_sum[2] / 2000.0f) + 1.0f; // assuming static position with Z axis pointing down
+    accel_offset[2] = accel_sum[2] / 2000.0f - 1.0f; // adjust for gravity and current orientation of sensor
 
     gyro_offset[0] = gyro_sum[0] / 2000.0f;
     gyro_offset[1] = gyro_sum[1] / 2000.0f;
