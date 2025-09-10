@@ -44,6 +44,8 @@
         "stdint.h": "c",
         "stdlib.h": "c",
         "i2c.h": "c",
-        "mpu9250.h": "c"
+        "mpu9250.h": "c",
+        "random": "c",
+        "cmath": "cpp"
     }
 }

@@ -1,13 +1,18 @@
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 #include "mpu9250.h"
-#include "kalman.h"
+#include "mekf.h"
 
 
-
-Kalman_t kf_pitch, kf_roll; //, kf_yaw;
+MEKF mekf;
+sigma noise = {
+    .theta = 0.1f, 
+    .bias = 0.01f, 
+    .accel = 0.01f, 
+    .mag = 1.0f};
 
 
 int main() {
@@ -39,12 +44,23 @@ int main() {
     mpu9250_calibrate();
     printf("Calibration done.\n");
 
-    kalman_init(&kf_pitch, 0.001f, 0.003f, 0.03f, 0.0f);
-    kalman_init(&kf_roll, 0.001f, 0.003f, 0.03f, 0.0f);
-    // kalman_init(&kf_yaw, 0.001f, 0.003f, 0.03f, 0.0f);
+    int16_t mag_raw_initial[3], accel_raw_initial[3], gyro_raw_initial[3], temp_raw_initial;
+    float mag_initial[3], accel_initial[3];
+
+    mpu9250_read_raw(accel_raw_initial, gyro_raw_initial, &temp_raw_initial);
+    mpu9250_read_mag_raw(mag_raw_initial);
+    mpu9250_convert_mag(mag_raw_initial, mag_initial);
+    mpu9250_convert_accel(accel_raw_initial, accel_initial);
+
+    float mag_ref[3] = {mag_initial[0], mag_initial[1], mag_initial[2]};
+
+    mekf_init(&mekf, &noise);
+    float q_initial[4];
+    init_quat_from_accel_mag(accel_initial, mag_ref, q_initial, 1); // 1 = zero yaw
+    memcpy(mekf.q, q_initial, sizeof(q_initial));
+
     absolute_time_t last_time = get_absolute_time();
 
-    float yaw = 0.0f;
     float accel[3], gyro[3], mag[3], temp;
     int16_t accel_raw[3], gyro_raw[3], mag_raw[3], temp_raw;
 
@@ -62,28 +78,24 @@ int main() {
         mpu9250_convert_temp(temp_raw, &temp);
         mpu9250_convert_mag(mag_raw, mag);
 
-        float roll_accel = atan2f(accel[1], accel[2]) * 180.0f / M_PI;
-        float pitch_accel = atan2f(-accel[0], sqrtf(accel[1]*accel[1] + accel[2]*accel[2])) * 180.0f / M_PI;
-        float yaw_mag = atan2f(-mag[1], mag[0]);
+        
+        mekf_predict(&mekf, gyro, dt);
+        mekf_update(&mekf, accel, G_INERTIAL, mekf.R_accel);
+        mekf_update(&mekf, mag, mag_ref, mekf.R_mag);
+       
 
-        float roll = kalman_update(&kf_roll, roll_accel, gyro[0], dt);
-        float pitch = kalman_update(&kf_pitch, pitch_accel, gyro[1], dt);
-        // float yaw = kalman_update(&kf_yaw, yaw_mag, gyro[2], dt);
+        float roll, pitch, yaw;
+        quat_to_euler(&mekf, &roll, &pitch, &yaw);
 
-        // yaw += gyro[2] * dt;
+        printf("Roll: %7.2f, Pitch: %7.2f, Yaw: %7.2f\n", roll, pitch, yaw);
+        // printf("q = [%.3f %.3f %.3f %.3f]\n", mekf.q[0], mekf.q[1], mekf.q[2], mekf.q[3]);
 
-        // float yaw_error = yaw_mag - yaw;
-        // if (yaw_error > 180.0f) yaw_error -= 360.0f;
-        // if (yaw_error < -180.0f) yaw_error += 360.0f;
-        // yaw += yaw_error * 0.1f;
+        // printf("ax=%6.2f ay=%6.2f az=%6.2f gx=%6.2f gy=%6.2f gz=%6.2f mx=%6.2f, my=%6.2f, mz=%6.2f, T=%5.2f degC\n",
+        //         accel[0], accel[1], accel[2],
+        //         gyro[0], gyro[1], gyro[2],
+        //         mag[0], mag[1], mag[2],
+        //         temp);
 
-        // printf("Roll: %7.2f, Pitch: %7.2f, Yaw: %7.2f\n", roll, pitch, yaw);
-
-        printf("ax=%6.2f ay=%6.2f az=%6.2f gx=%6.2f gy=%6.2f gz=%6.2f mx=%6.2f, my=%6.2f, mz=%6.2f, T=%5.2f degC\n",
-                accel[0], accel[1], accel[2],
-                gyro[0], gyro[1], gyro[2],
-                mag[0], mag[1], mag[2],
-                temp);
             
         sleep_ms(50);
     }

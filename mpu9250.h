@@ -57,7 +57,9 @@ extern "C" {
 
 extern float accel_offset[3];
 extern float gyro_offset[3];
+extern float mag_offset[3];
 extern float mag_adjust[3];
+extern float mag_raw_initial[3];
 
 // function prototypes
 void mpu9250_reset(void);

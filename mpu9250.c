@@ -4,6 +4,7 @@
 
 float accel_offset[3] = {0.0f};
 float gyro_offset[3] = {0.0f};
+float mag_offset[3] = {0.0f};
 float mag_adjust[3] = {1.0f, 1.0f, 1.0f};
 
 void mpu9250_reset() {
@@ -89,20 +90,22 @@ void mpu9250_read_mag_raw(int16_t mag_raw[3]) {
     i2c_write_blocking(I2C_PORT, AK8963_ADDR, &reg, 1, true);
     i2c_read_blocking(I2C_PORT, AK8963_ADDR, buffer, 7, false);
 
-    mag_raw[0] = (buffer[0] << 8) | buffer[1];
-    mag_raw[1] = (buffer[2] << 8) | buffer[3];
-    mag_raw[2] = (buffer[4] << 8) | buffer[5];
+    mag_raw[0] = buffer[0] | (buffer[1] << 8);
+    mag_raw[1] = buffer[2] | (buffer[3] << 8);
+    mag_raw[2] = buffer[4] | (buffer[5] << 8);
 }
 
 void mpu9250_calibrate() {
-    float accel_sum[3] = {0}, gyro_sum[3] = {0};
-    int16_t accel_raw[3], gyro_raw[3], temp_raw;
-    float accel[3], gyro[3], temp;
+    float accel_sum[3] = {0}, gyro_sum[3] = {0}, mag_sum[3] = {0};
+    int16_t accel_raw[3], gyro_raw[3], temp_raw, mag_raw[3];
+    float accel[3], gyro[3], temp, mag[3];
 
     for (int i = 0; i < 2000; i++) {
         mpu9250_read_raw(accel_raw, gyro_raw, &temp_raw);
+        mpu9250_read_mag_raw(mag_raw);
         mpu9250_convert_accel(accel_raw, accel);
         mpu9250_convert_gyro(gyro_raw, gyro);
+        mpu9250_convert_mag(mag_raw, mag);
 
         accel_sum[0] += accel[0];
         accel_sum[1] += accel[1];
@@ -112,22 +115,30 @@ void mpu9250_calibrate() {
         gyro_sum[1] += gyro[1];
         gyro_sum[2] += gyro[2];
 
+        mag_sum[0] += mag[0];
+        mag_sum[1] += mag[1];
+        mag_sum[2] += mag[2];
+
         sleep_ms(5);
     }
 
     accel_offset[0] = accel_sum[0] / 2000.0f;
     accel_offset[1] = accel_sum[1] / 2000.0f;
-    accel_offset[2] = accel_sum[2] / 2000.0f - 1.0f; // adjust for gravity and current orientation of sensor
+    accel_offset[2] = accel_sum[2] / 2000.0f - 1.0f; // adjust for gravity and current orientation of sensor (assuming Z axis is positive up)
 
     gyro_offset[0] = gyro_sum[0] / 2000.0f;
     gyro_offset[1] = gyro_sum[1] / 2000.0f;
     gyro_offset[2] = gyro_sum[2] / 2000.0f;
+
+    mag_offset[0] = mag_sum[0] / 2000.0f;
+    mag_offset[1] = mag_sum[1] / 2000.0f;
+    mag_offset[2] = mag_sum[2] / 2000.0f;
 }
 
 void mpu9250_convert_mag(const int16_t mag_raw[3], float mag[3]) {
-    mag[0] = mag_raw[0] * mag_adjust[0] * 0.15f;
-    mag[1] = mag_raw[1] * mag_adjust[1] * 0.15f;
-    mag[2] = mag_raw[2] * mag_adjust[2] * 0.15f;
+    mag[0] = (mag_raw[0] * mag_adjust[0] * 0.15f) - mag_offset[0];
+    mag[1] = (mag_raw[1] * mag_adjust[1] * 0.15f) - mag_offset[1];
+    mag[2] = (mag_raw[2] * mag_adjust[2] * 0.15f) - mag_offset[2];
 }
 
 void mpu9250_convert_accel(const int16_t accel_raw[3], float accel[3]) {

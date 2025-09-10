@@ -33,9 +33,11 @@ project(main C CXX ASM)
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
+add_subdirectory(lib/linalg)
+
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(main main.cpp mpu9250.c kalman.c)
+add_executable(main main.cpp mpu9250.c kalman.c mekf.c)
 
 pico_set_program_name(main "main")
 pico_set_program_version(main "0.1")
@@ -47,7 +49,8 @@ pico_enable_stdio_usb(main 1)
 # Add the standard library to the build
 target_link_libraries(main
         pico_stdlib
-        hardware_i2c)
+        hardware_i2c
+        linalg)
 
 # Add the standard include files to the build
 target_include_directories(main PRIVATE
