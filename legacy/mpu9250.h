@@ -55,21 +55,23 @@
 extern "C" {
 #endif
 
-extern float accel_offset[3];
-extern float gyro_offset[3];
-extern float mag_offset[3];
-extern float mag_adjust[3];
-extern float mag_raw_initial[3];
+// extern float accel_offset[3];
+// extern float gyro_offset[3];
+// extern float mag_adjust[3];
+
 
 // function prototypes
 void mpu9250_reset(void);
 void mpu9250_configure(void);
+
 void mpu9250_read_raw(int16_t accel_raw[3], int16_t gyro_raw[3], int16_t *temp_raw);
 void mpu9250_read_mag_raw(int16_t mag_raw[3]);
+
 void mpu9250_convert_accel(const int16_t accel_raw[3], float accel[3]);
 void mpu9250_convert_gyro(const int16_t gyro_raw[3], float gyro[3]);
 void mpu9250_convert_temp(const int16_t temp_raw, float *temp);
 void mpu9250_convert_mag(const int16_t mag_raw[3], float mag[3]);
+
 void mpu9250_calibrate(void);
 
 
