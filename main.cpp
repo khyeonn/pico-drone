@@ -55,8 +55,6 @@ int main() {
         filter.update(accel, mag);
 
         printf("%.2f, %.2f, %.2f, %.2f\n", filter.get_quat().w, filter.get_quat().x, filter.get_quat().y, filter.get_quat().z);
-        
-        // printf("Roll: %7.2f, Pitch: %7.2f, Yaw: %7.2f\n", angles.roll*180.0f/M_PI, angles.pitch*180.0f/M_PI, angles.yaw*180.0f/M_PI);
 
         // printf("ax=%6.2f ay=%6.2f az=%6.2f gx=%6.2f gy=%6.2f gz=%6.2f mx=%6.2f, my=%6.2f, mz=%6.2f, T=%5.2f degC\n",
         //         accel.x, accel.y, accel.z,
@@ -64,40 +62,8 @@ int main() {
         //         mag.x, mag.y, mag.z,
         //         temp);
 
-        // MOTOR TEST
-
-
             
         sleep_ms(50);
     }
     return 0;
 }
-
-// int main() {
-//     stdio_init_all();
-
-//     // ---- ADC setup (potentiometer) ----
-//     adc_init();
-//     adc_gpio_init(26);  // GP26 -> ADC0
-//     adc_select_input(0);
-
-//     // ---- PWM setup (LED) ----
-//     uint pwm_pin = 15;  // GP15
-//     gpio_set_function(pwm_pin, GPIO_FUNC_PWM);
-//     uint slice_num = pwm_gpio_to_slice_num(pwm_pin);
-
-//     pwm_set_wrap(slice_num, 255);        // 8-bit PWM resolution
-//     pwm_set_chan_level(slice_num, PWM_CHAN_A, 0);  // start off
-//     pwm_set_enabled(slice_num, true);
-
-//     while (true) {
-//         uint16_t pot_raw = adc_read(); // 0-4095
-
-//         // Map ADC 0-4095 to PWM 0-255
-//         uint16_t pwm_level = (pot_raw * 255) / 4095;
-
-//         pwm_set_chan_level(slice_num, PWM_CHAN_A, pwm_level);
-
-//         sleep_ms(10);
-//     }
-// }
