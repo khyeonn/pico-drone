@@ -24,10 +24,15 @@ The following components were used in this project:
 | MPU9250 Module| 1 |
 | 4S 1300mAh Lipo Battery| 1 |
 | RS2205 2300kV BLDC Motors | 4 |
+| Littlebee 20A ESC | 4 |
 | 5x4x3 Propellers (2 CW and 2 CCW) | 4 |
 | Matek Systems PDB-XT60 | 1 |
 
 *CW - Clockwise and CCW - Counter clockwise*
+
+
+I was lucky to find this bundle on [Amazon](https://a.co/d/jiEhTFR) (not an affiliate link).
+But it seems the price has gone up since I bought it. There is another bundle that is cheaper that *probably* [works](https://a.co/d/3QJOrdP) (again, not affiliate link).
 
 
 ## Installing
