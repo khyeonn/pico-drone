@@ -5,7 +5,8 @@ This was mostly a learning project to gain firsthand experience in designing and
 
 ## Project Status
 
-The project is still a work in progress. As of Oct 9, 2025, I am working on designing the frame.
+The project is still a work in progress. As of December 22, 2025, I am working on designing the frame. 
+I took some time off to help with my family's business. Frame is still in development
 
 
 ## Prerequisites 
@@ -16,7 +17,7 @@ Basic soldering skills are necessary to complete this project. As such, basic so
 
 ### Bill of Materials
 
-The following components were used in this project:
+The following components were used in this project. As project develops, the BOM will be updated:
 
 | Part | Quantity |
 | :-- | :-- |
