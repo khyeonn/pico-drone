@@ -5,8 +5,9 @@ This was mostly a learning project to gain firsthand experience in designing and
 
 ## Project Status
 
-The project is still a work in progress. As of December 22, 2025, I am working on designing the frame. 
-I took some time off to help with my family's business. Frame is still in development
+I have decided to add a simulation component. This enables sim2real testing and validation which I find is a much more rewarding and comprehensive path towards building this drone. I also believe that I will learn more by adding this aspect, and that is my ultimate goal.
+
+I have moved the development of this repo to a new repo, which will be published soon once the basics are setup. I want this to be as self-contained as possible and make the setup as painless as possible, so that anyone can clone the repo, buy the hardware, and build and fly their own drones. 
 
 
 ## Prerequisites 
